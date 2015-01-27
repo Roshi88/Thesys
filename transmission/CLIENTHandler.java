@@ -25,7 +25,7 @@ public class CLIENTHandler implements Runnable {
         try {
         	byte [] mybytearray  = new byte [FILE_SIZE];
             InputStream is = clientSocket.getInputStream();
-            String tempfilename ="temp"+System.currentTimeMillis();
+            String tempfilename ="temp"+System.nanoTime();
             fos = new FileOutputStream(tempfilename);
             bos = new BufferedOutputStream(fos);
             bytesRead = is.read(mybytearray,0,mybytearray.length);

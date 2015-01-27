@@ -1,4 +1,4 @@
-package classes;
+package resources;
 import java.io.FileWriter;
 
 import java.io.IOException;
@@ -15,7 +15,7 @@ public class Generation {
 
 // Generazione della coppia di chiavi
 	
-	public static BigInteger coupleGen(int nID){
+	public static PaillierPrivateKey coupleGen(int nID){
 		
 		int nodeID=nID;
 		int s=32;
@@ -30,7 +30,7 @@ public class Generation {
 		
 		PaillierKey pu= pr.getPublicKey();
 		
-		System.out.println("PublicKey:("+pr.getN()+","+pr.getNPlusOne()+")");
+		//System.out.println("PublicKey:("+pr.getN()+","+pr.getNPlusOne()+")");
 		
 		
 
@@ -56,7 +56,7 @@ public class Generation {
 			catch(IOException e){
 				System.out.println(e);
 			}
-			return pr.getN();
+			return pr;
 	}
 	
 }

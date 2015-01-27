@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.math.BigInteger;
 
 public class Utilities {
 
@@ -58,6 +59,56 @@ public class Utilities {
 		return MANIPs;
 		
 	}
+	
+	
+	public static void fileEncription(String pathname){
+		
+		BufferedReader br = null;
+		 
+		 
+		String sCurrentLine;
+
+		try{
+			br = new BufferedReader(new FileReader("ip_list"));
+		
+		
+		String result="";
+		
+		while ((sCurrentLine = br.readLine()) != null) {
+			System.out.println(sCurrentLine);
+			
+			if (result==""){
+				result=result + sCurrentLine;
+								
+			}
+			else{
+			result = result + " " + sCurrentLine;
+			}
+		}
+
+		System.out.println(result);
+		
+		String[] parts = result.split(" ");
+		
+		System.out.println(parts[0]);
+		
+		
+		byte[] bytemsg=result.getBytes();
+		BigInteger m=new BigInteger(bytemsg); 
+
+		
+		System.out.println(m);
+		
+		System.out.println(new String(m.toByteArray()));
+		br.close();
+		}catch(IOException e){
+			System.out.println(e);
+		}
+			
+		
+		
+	}
+	
 	
 	
 	

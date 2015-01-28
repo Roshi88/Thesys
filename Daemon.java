@@ -1,18 +1,19 @@
 import transmission.*;
 import resources.*;
 import resources.Structures.*;
-import paillierp.key.PaillierPrivateKey;
 
+import paillierp.key.PaillierPrivateKey;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.math.BigInteger;
+import java.io.IOException;
 
 
 public class Daemon {
 
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		
 //////////////////////////////////    NODE PARAMETERS    //////////////////////////////////
 	
@@ -69,7 +70,7 @@ public class Daemon {
 	//Counting how many IPs i have in my ips list
 	int count=0;
 	
-	count=Utilities.numOfIPs(iplist);
+	count=Utilities.numOfLines(iplist);
 	System.out.println("Number of IPs in ip list: "+count);
 		
 		
@@ -80,9 +81,27 @@ public class Daemon {
 
 
 
+/////////////////////    Generation of (n,s) Shares n number of shares, s key length  ////////
+	
+	Generation.shareGen(5,32);
+	
+////////////////////    Insertion of template number into share files    /////////////////////
 	
 	
+	//Array of file names containing keys
+	String[] chiavi = new String[count];
+	for (int i=0; i<count; i++){
+	chiavi[i] = "chiave" + (i+1);
+		}
+	//Array of template file names containing keys
+	String[] keys = new String[count];
+	for (int i=0; i<count; i++){
+	keys[i] = "Tkey" + (i+1);
+		}
 	
+	for (int i=0; i<(count);i++){
+		Utilities.insertTemplateNum(chiavi[i],keys[i] , 1);
+	}
 	
 	
 	

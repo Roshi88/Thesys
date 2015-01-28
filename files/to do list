@@ -1,0 +1,10 @@
+ho i 5 file contenenti gli share, in chiaro
+trasformare i file in biginteger
+criptare ogni file con la chiave pubblica del destinatario
+scrivere questo nuovo biginteger su di un file
+trasmettere ogni file contenente un biginteger al relativo destinatario
+dal lato ricezione prendere il file
+tirarne fuori il biginteger
+decriptarlo
+leggere qual'è il primo carattere per capire cosa fare dei dati ricevuti
+togliere il primo carattere e mettere lo share nell'oggetto desiderato

@@ -1,12 +1,15 @@
 import transmission.*;
 import resources.*;
 import resources.Structures.*;
-
 import paillierp.key.PaillierPrivateKey;
+import paillierp.key.PaillierKey;
+import paillierp.Paillier;
+
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.math.BigInteger;
+import java.io.File;
 import java.io.IOException;
 
 
@@ -54,6 +57,7 @@ public class Daemon {
 	//Generation of my public and private key
 	PaillierPrivateKey MyPr = Generation.coupleGen(nID);
 	BigInteger Pub= MyPr.getN();
+	PaillierKey PU=MyPr.getPublicKey();
 		
 /////////////////////////    Filling NodeInfo of all nodes    //////////////////////////////
 	
@@ -72,18 +76,11 @@ public class Daemon {
 	
 	count=Utilities.numOfLines(iplist);
 	System.out.println("Number of IPs in ip list: "+count);
-		
-		
-//////////////////////////   Filling Array of MANET IP Addresses    //////////////////////////
-		
-	//Creating an Array containing all the ips that i have in the ip list
-	//InetAddress[] MANIPs=Utilities.arrayOfIPs(iplist, count);
-
 
 
 /////////////////////    Generation of (n,s) Shares n number of shares, s key length  ////////
 	
-	Generation.shareGen(5,32);
+	Generation.shareGen(5,64);
 	
 ////////////////////    Insertion of template number into share files    /////////////////////
 	
@@ -104,9 +101,64 @@ public class Daemon {
 	}
 	
 	
+////////////////////////// split shares' files in 64 byte files    ///////////////////////////////////
+
 	
+//count è il numero di nodi
+//size è il numero di spezzoni di file
 	
+File res= new File(keys[0]);
+int size = (int)(res.length()/64)+1;
+BigInteger[][] Bi = new BigInteger[count-1][size];	
+
+
+
+
+System.out.println("Size is:"+size);
 	
+for (int i=1; i<count;i++){
+	
+	Utilities.splitFile(new File(keys[i]));
+	
+	}
+	
+for (int i=0;i<(count-1);i++){
+	
+	for (int j=0;j<size;j++){
+		
+		Bi[i][j]=Utilities.fileToBigInteger("Tkey"+(i+2)+".00"+(j+1));
+		
+	}
+	
+}
+
+//ORA DEVO CRIPTARE OGNI PARTE DI FILE CON UNA CHIAVE PUBBLICA (PU) E CONTROLLARE LA DIMENSIONE DI USCITA DEL FILE
+//QUINDI RICOSTRUIRE IL FILE E TRASMETTERLO
+//QUINDI RISPLITTARLO CON BLOCCHI DI DIMENSIONE COME QUELLA USCITA AL PUNTO 1 ^^^
+//DECRIPTARE OGNI BLOCCO E RICOSTRUIRE IL FILE ORIGINARIO 
+
+	
+///////////////////    Transform files in BigInteger    ///////////////////////////////////////
+	
+//	BigInteger[] Bi = new BigInteger[count];
+//	
+//	for (int i=0; i<count;i++){
+//		
+//		Bi[i]=Utilities.fileToBigInteger(keys[i]);
+//	
+//		System.out.println(Bi[i]);
+//	}
+	
+////////////    Encrypt the file containing the share with the DST Public Key    /////////////
+	
+//	Paillier[] esys = new Paillier[count-1];
+//	for (int i=0; i<count-1;i++){
+//		esys[i]=new Paillier();
+//	}
+//	
+//	esys[0].setEncryption(PU);
+//	
+//	BigInteger C = esys[0].encrypt(Bi[1]);
 	
 	
 		

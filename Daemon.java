@@ -11,6 +11,8 @@ import java.net.Socket;
 import java.math.BigInteger;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+
 
 
 public class Daemon {
@@ -25,49 +27,28 @@ public class Daemon {
 	
 	//IP's list file position
 	String iplist="/home/elia/Desktop/thesys/Thesys/src/files/ip_list";
-		
-		
-		
-//////////////////////////    IPV4 address of this node    //////////////////////////////////
-	
-	//Creating an InetAddress object containing my IP address
-		
-	InetAddress MyIP=Utilities.retrieveIP("192.168.1.1");
-	System.out.println(MyIP);	
-	
-	InetAddress IP2=Utilities.retrieveIP("192.168.1.2");
-	System.out.println(IP2);
-	BigInteger Pub2=new BigInteger("14323241558373291833");
-	
-	InetAddress IP3=Utilities.retrieveIP("192.168.1.3");
-	System.out.println(IP3);
-	BigInteger Pub3=new BigInteger("9412274574912913409");
-	
-	InetAddress IP4=Utilities.retrieveIP("192.168.1.4");
-	System.out.println(IP4);
-	BigInteger Pub4=new BigInteger("7463061501062165399");
-	
-	InetAddress IP5=Utilities.retrieveIP("192.168.1.5");
-	System.out.println(IP5);
-	BigInteger Pub5=new BigInteger("12086758193826994631");
-	
 	
 /////////////////////    Generation of Key Couple    /////////////////////////////////////////	
 	
 	//Generation of my public and private key
-	PaillierPrivateKey MyPr = Generation.coupleGen(nID);
+	PaillierPrivateKey MyPr = Generation.coupleGen(nID,32);
 	BigInteger Pub= MyPr.getN();
 	PaillierKey PU=MyPr.getPublicKey();
+	
+	//Generation of pri,pub key of the other nodes (just for simulation)
+	
+	PaillierPrivateKey[] NodePris = new PaillierPrivateKey[4];
+	
+	for (int i=2; i<6;i++){
+		NodePris[i-2]=Generation.coupleGen(i,32);
 		
-/////////////////////////    Filling NodeInfo of all nodes    //////////////////////////////
+		while(NodePris[i-2].getN().toByteArray().length!=9){
+			NodePris[i-2]=Generation.coupleGen(i, 32);
+		}
+		
+	}
 	
-	//Creating a node Info object containing my node IP, ID, Public Password
-	nodeInfo myNode= new nodeInfo(nID,Pub,MyIP);
-	nodeInfo node2= new nodeInfo(2,Pub2,IP2);
-	nodeInfo node3= new nodeInfo(3,Pub3,IP3);
-	nodeInfo node4= new nodeInfo(4,Pub4,IP4);
-	nodeInfo node5= new nodeInfo(5,Pub5,IP5);
-	
+		
 	
 //////////////////////////   Number of IP Addresses inside of ip_list   /////////////////////
 	
@@ -80,7 +61,7 @@ public class Daemon {
 
 /////////////////////    Generation of (n,s) Shares n number of shares, s key length  ////////
 	
-	Generation.shareGen(5,64);
+	Generation.shareGen(5,32);
 	
 ////////////////////    Insertion of template number into share files    /////////////////////
 	
@@ -101,14 +82,18 @@ public class Daemon {
 	}
 	
 	
-////////////////////////// split shares' files in 64 byte files    ///////////////////////////////////
+////////////////////////// split shares' files in xx byte files    ///////////////////////////////////
 
 	
 //count è il numero di nodi
 //size è il numero di spezzoni di file
+for (int i=0;i<4;i++){
+int sizeofn = NodePris[i].getN().toByteArray().length;
+System.out.println("Size of n:"+sizeofn);}
 	
+int sizeofn=8;
 File res= new File(keys[0]);
-int size = (int)(res.length()/64)+1;
+int size = (int)(res.length()/(sizeofn-1))+1;
 BigInteger[][] Bi = new BigInteger[count-1][size];	
 
 
@@ -118,7 +103,7 @@ System.out.println("Size is:"+size);
 	
 for (int i=1; i<count;i++){
 	
-	Utilities.splitFile(new File(keys[i]));
+	Utilities.splitFile(new File(keys[i]),(sizeofn-1)); //in questo modo divido i file in dimensioni pari ad n
 	
 	}
 	
@@ -126,41 +111,75 @@ for (int i=0;i<(count-1);i++){
 	
 	for (int j=0;j<size;j++){
 		
+		if(j<9){
 		Bi[i][j]=Utilities.fileToBigInteger("Tkey"+(i+2)+".00"+(j+1));
+		}
+		if(j>8){
+			Bi[i][j]=Utilities.fileToBigInteger("Tkey"+(i+2)+".0"+(j+1));
+		}
 		
 	}
 	
 }
 
-//ORA DEVO CRIPTARE OGNI PARTE DI FILE CON UNA CHIAVE PUBBLICA (PU) E CONTROLLARE LA DIMENSIONE DI USCITA DEL FILE
-//QUINDI RICOSTRUIRE IL FILE E TRASMETTERLO
-//QUINDI RISPLITTARLO CON BLOCCHI DI DIMENSIONE COME QUELLA USCITA AL PUNTO 1 ^^^
-//DECRIPTARE OGNI BLOCCO E RICOSTRUIRE IL FILE ORIGINARIO 
+//Ora ho una matrice le cui celle sono spezzoni di file.
 
-	
-///////////////////    Transform files in BigInteger    ///////////////////////////////////////
-	
-//	BigInteger[] Bi = new BigInteger[count];
-//	
-//	for (int i=0; i<count;i++){
-//		
-//		Bi[i]=Utilities.fileToBigInteger(keys[i]);
-//	
-//		System.out.println(Bi[i]);
-//	}
-	
-////////////    Encrypt the file containing the share with the DST Public Key    /////////////
-	
-//	Paillier[] esys = new Paillier[count-1];
-//	for (int i=0; i<count-1;i++){
-//		esys[i]=new Paillier();
-//	}
-//	
-//	esys[0].setEncryption(PU);
-//	
-//	BigInteger C = esys[0].encrypt(Bi[1]);
-	
-	
+//La prima colonna rappresenta i primi spezzoni degli n file
+//La prima riga rappresenta gli spezzoni del primo file
+//ORA DEVO CRIPTARE OGNI PARTE DI FILE CON UNA CHIAVE PUBBLICA (PU) E CONTROLLARE LA DIMENSIONE DI USCITA DEL FILE
+
+//adesso devo criptare ogni spezzone della stessa riga con la stessa chiave.
+//Devo avere le chiavi in versione PaillierKey
+
+
+
+//Cripto la prima riga
+
+Paillier esys = new Paillier();
+esys.setDecryptEncrypt(MyPr);
+BigInteger[] C1 = new BigInteger[size]; //per ogni riga (cioè per ogni file) ho size(29)sottocyphs
+
+System.out.println(Bi[1][1].toByteArray().length);
+System.out.println(MyPr.getN().toByteArray().length);
+
+for (int i=0;i<size;i++){
+	C1[i]=esys.encrypt(Bi[0][i]);
+	System.out.println(C1[i]);
+	String name= new String();
+	if(i<9){
+		name = "Cyph2.00"+(i+1);
+	}
+	if(i>8){
+		name = "Cyph2.0"+(i+1);
+	}
+	Utilities.bigIntegerToFile(C1[i], name);
+}
+
+//devo rimettere ogni BigInteger in un file chiamato Cyphx.00etc
+
+
+
+
+
+//rimetto in un solo file la prima riga (mi servirà dopo dati tutti i biginteger)
+
+
+//ArrayList<File> arf = new ArrayList<File>();
+//File [] files =new File[size];
+//for(int i=0; i<size;++i){
+//	if(i<9)
+//		files[i]=new File ("Cyph2.00"+(i+1));
+//	if(i>8)
+//		files[i]=new File ("Cyph2.0"+(i+1));
+//	arf.add(files[i]);
+//}
+//File result = new File ("Cyph2.rec");
+//
+//if(!result.exists())
+//	result.createNewFile();
+//Utilities.mergeFiles(arf, result);
+
+//Il file Cyph2.rec è il merge dei singoli file criptati
 		
 /////////////////////     Opening MultiThreaded Server    //////////////////////////////////
 	

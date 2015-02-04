@@ -91,11 +91,11 @@ public class Utilities {
 	
 	
 	
-	    public static void splitFile(File f) throws IOException {
+	    public static void splitFile(File f,int sizeofchunk) throws IOException {
 	        int partCounter = 1;//I like to name parts from 001, 002, 003, ...
 	                            //you can change it to 0 if you want 000, 001, ...
 
-	        int sizeOfFiles = 64;//split file size
+	        int sizeOfFiles = sizeofchunk;//split file size
 	        byte[] buffer = new byte[sizeOfFiles];
 
 	        try (BufferedInputStream bis = new BufferedInputStream(

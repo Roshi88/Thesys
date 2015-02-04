@@ -15,10 +15,9 @@ public class Generation {
 
 // Generazione della coppia di chiavi
 	
-	public static PaillierPrivateKey coupleGen(int nID){
+	public static PaillierPrivateKey coupleGen(int nID,int s){
 		
 		int nodeID=nID;
-		int s=32;
 		Random random = new Random();
 		long seed = random.nextLong();
 
@@ -62,7 +61,9 @@ public class Generation {
 	
 	public static void shareGen(int n, int s)throws IOException{
 		
-		int l=n;
+		
+		//s è la lunghezza delle chiavi
+		int l=n; //numero nodi
 		
 		int w= (l/2)+1;
 		

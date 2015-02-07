@@ -99,7 +99,7 @@ public class testino {
 			
 			R[i]=dsys.decrypt(M[i]);
 			System.out.println(R[i]);
-			
+			//qui io devo mettere il BigInteger nel file
 			String outfname= new String();
 			if(i<9){
 				outfname = "rxPlain1.00"+(i+1);
@@ -109,7 +109,7 @@ public class testino {
 			}
 			
 			
-			Utilities.newBigIntegerToFile(R[i], outfname);
+			Utilities.bigIntegerToFile(R[i], outfname);
 			//adesso devo ricostruire
 			
 			
@@ -128,6 +128,9 @@ public class testino {
 			if(!res.exists())
 				res.createNewFile();
 			Utilities.mergeFiles(arf, res);
+			
+			// In questo modo ho mergiato i BigInteger
+			
 			
 			
 		}

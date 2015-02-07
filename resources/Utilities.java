@@ -7,6 +7,7 @@ import java.io.FileWriter;
 import java.io.File;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.PrintWriter;
 import java.util.List;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -199,7 +200,38 @@ public class Utilities {
 		
 	}
 	
+	//BigInteger to file with Paillier Library method
 	
+	public static void newBigIntegerToFile(BigInteger b,String outFileName){
+		
+		try{
+		FileWriter File= new FileWriter(outFileName);
+		PrintWriter out=new PrintWriter(File);
+		
+		out.println(b);
+		out.close();
+		}catch(IOException e){
+			System.out.println(e);
+		}
+		
+	}
+	
+	//File to BigInteger with Paillier Library method
+	
+	public static BigInteger newFileToBigInteger(String inFileName){
+		BigInteger M=null;
+		try{
+		FileReader File= new FileReader(inFileName);
+		BufferedReader buf=new BufferedReader(File);
+		String line=buf.readLine();
+		M = new BigInteger(line);
+		buf.close();
+		}catch(IOException e){
+			System.out.println(e);
+		}
+		return M;
+		
+	}
 	
 	
 	

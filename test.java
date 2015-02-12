@@ -1,5 +1,7 @@
 import java.math.BigInteger;
+import java.util.regex.Pattern;
 
+import transmission.*;
 import resources.Utilities;
 
 public class test {
@@ -7,22 +9,16 @@ public class test {
 	public static void main(String[] args) {
 
 		
-//      MTClient.fileTransmit(8080, "localhost", "ip_list");
-//      MTClient.fileTransmit(8080, "localhost", "ip_list");
 		
-		Utilities.insertTemplateNum("ip_list","ip_list_templated", 1);
+//		BigInteger Bmsg=BigInteger.valueOf(123123123);
+//		MTMultiClient.bigintTransmit(8080, "localhost", Bmsg,"Cyph4");
+ //     MTClient.fileTransmit(8080, "localhost", "ip_list");
 		
-		BigInteger msg = Utilities.fileToBigInteger("ip_list");
-		
-		String res = Utilities.bigIntegerToString(msg);//per riportare da BigInteger a Stringa
-		
-		System.out.println(msg);
-		System.out.println(res);
-		
-		//BigInteger to file
-		Utilities.bigIntegerToFile(msg, "BItoFile");
-		
-		Utilities.removeTemplateNum("ip_list_templated","ip_list_fixed");
+		 String sMsg="1-29";
+		 String[] splitArr=Pattern.compile("-").split(sMsg);
+		 System.out.println(splitArr[0]);
+		 System.out.println(splitArr[1]);
+
 	}
 
 }

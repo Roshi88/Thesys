@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -16,6 +17,10 @@ import java.net.InetAddress;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.math.BigInteger;
+
+import paillierp.key.PaillierPrivateKey;
+import paillierp.key.PaillierKey;
+import paillierp.Paillier;
 
 public class Utilities {
 	
@@ -317,5 +322,91 @@ public class Utilities {
 		
 		
 	}
-	//remove template num TO DO
+	
+	public static void retrieveShare(PaillierPrivateKey Pr,int nID){
+		
+		String name= new String();
+		String outfname= new String();
+		BigInteger[] C = new BigInteger[29];
+		BigInteger[] M = new BigInteger[29];
+		ArrayList<File> arf = new ArrayList<File>();
+		File [] files =new File[29];
+		Paillier dsys = new Paillier();
+		dsys.setDecryptEncrypt(Pr);
+		
+		for(int i=0;i<29;i++){
+			
+			if(i<9){
+				name = "Cyph"+nID+".00"+(i+1);
+				outfname = "rxPlain"+nID+".00"+(i+1);
+				files[i]=new File ("rxPlain"+nID+".00"+(i+1));
+			}
+			if(i>8){
+				name = "Cyph"+nID+".0"+(i+1);
+				outfname = "rxPlain"+nID+".0"+(i+1);
+				files[i]=new File ("rxPlain"+nID+".0"+(i+1));
+			}
+		
+			C[i]=Utilities.newFileToBigInteger(name);
+			M[i]=dsys.decrypt(C[i]);
+			Utilities.bigIntegerToFile(M[i], outfname);
+				
+			arf.add(files[i]);
+			
+			File res = new File ("rxPlain"+nID+".rec");
+	
+			
+			
+			try{
+			if(!res.exists())
+				res.createNewFile();
+			Utilities.mergeFiles(arf, res);
+			}catch(IOException e){
+				System.out.println(e);
+			}
+		
+		}
+		
+	}//end of retrieveShare
+	
+	public static void listAndMergeFiles(String inFileName,int num_of_chks){
+		
+		ArrayList<File> arf = new ArrayList<File>();
+		File [] files =new File[num_of_chks];
+		for(int i=0; i<num_of_chks;++i){
+			
+			if(i<9)
+				files[i]=new File (inFileName+".00"+(i+1));
+			if(i>8)
+				files[i]=new File (inFileName+".0"+(i+1));
+			arf.add(files[i]);
+		}
+		File res = new File (inFileName+".rec");
+
+		
+		
+		try{
+		if(!res.exists())
+			res.createNewFile();
+		Utilities.mergeFiles(arf, res);
+		}catch(IOException e){
+			System.out.println(e);
+		}
+		
+	}
+	
+	
+	public static BigInteger encryptTipeAndChunks(int type, int num_of_chunks, PaillierKey Pub){
+	
+		String msg=new String(type+"-"+num_of_chunks);
+		Paillier esys = new Paillier();
+		esys.setEncryption(Pub);
+		BigInteger B = Utilities.stringToBigInteger(msg);
+		BigInteger C = null;
+		C=esys.encrypt(B);
+		
+		return C;
+		
+	}
+	
 }

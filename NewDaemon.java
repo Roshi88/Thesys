@@ -46,10 +46,9 @@ public class NewDaemon {
 		System.out.println("Bitlength: "+shares[0].bitLength()+"\n"+shares[0].toString().length());
 		
 		BigInteger[] C = Utilities.splitBigInteger(shares[0], 7);
-		System.out.println(C[0]+"\n"+C[67]);
-		
-		
-		
+		System.out.println(C[0]+"\n"+C[(C.length)-1]);//si aggira sui 67
+
+		System.out.println("Lunghezza di C: "+C.length); // con C.length ottengo quanti elementi ha C
 		
 		
 		

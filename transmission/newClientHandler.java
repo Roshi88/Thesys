@@ -20,7 +20,7 @@ public class newClientHandler implements Runnable {
 	 private Socket clientSocket;
 	 private PaillierPrivateKey PrivKey;
 	 ServerSocket servSock;
-	 BigInteger msg = null;
+	 BigInteger[] msg = null;
 	 BigInteger plain = null;
 	 int bytesRead;
 	 int current = 0;
@@ -32,9 +32,9 @@ public class newClientHandler implements Runnable {
 	 int num_of_chunks=-1;
 	 
 	 
-	public newClientHandler(Socket client, PaillierPrivateKey Pr) {
+	public newClientHandler(Socket client) {
         this.clientSocket = client;
-        this.PrivKey = Pr;
+        
     }
 	
 	public void run() {
@@ -42,9 +42,10 @@ public class newClientHandler implements Runnable {
 			
 			 ObjectOutputStream oos = new ObjectOutputStream(clientSocket.getOutputStream());
 			 ObjectInputStream ois = new ObjectInputStream(clientSocket.getInputStream());
-			 msg = (BigInteger) ois.readObject();
+			 msg = (BigInteger[]) ois.readObject();
 			 System.out.println("Received Biginteger is:"+msg);
 			 oos.writeObject("Received");
+			 System.out.println(msg[0]+","+msg[1]+","+msg[2]);
 //			 Paillier dsys = new Paillier();
 //			 dsys.setDecryptEncrypt(PrivKey);
 //			 plain=dsys.decrypt(msg);

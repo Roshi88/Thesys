@@ -1,8 +1,12 @@
 package resources;
 import java.io.FileWriter;
+import java.io.FileReader;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Random;
+import java.math.BigInteger;
+
 
 import paillierp.key.KeyGen;
 import paillierp.key.PaillierKey;
@@ -110,6 +114,38 @@ public class Generation {
 		out.close();
 		}
 		
+	}
+	
+public static PaillierPrivateKey retrieveMyPrivateKey(int nID, String keysFileName){
+		
+		BigInteger[] dp= new BigInteger[5];
+		BigInteger[] dpinv= new BigInteger[5];
+		BigInteger[] np= new BigInteger[5];
+		long seed = 123123123;
+		String line = null;
+		
+		try{
+		FileReader File= new FileReader(keysFileName);
+		BufferedReader buf=new BufferedReader(File);
+		for (int i=0;i<5;i++){
+			
+			line = buf.readLine();
+			dp[i] = new BigInteger(line.split(":")[1]);			
+			
+			line = buf.readLine();
+			dpinv[i] = new BigInteger(line.split(":")[1]);
+			
+			line = buf.readLine();
+			np[i] = new BigInteger(line.split(":")[1]);
+			
+			
+		}buf.close();
+		}catch(IOException e){
+			System.out.println(e);
+		}
+		
+		PaillierPrivateKey MyPr = new PaillierPrivateKey(np[nID-1],dp[nID-1],seed);
+		return MyPr;
 	}
 	
 }

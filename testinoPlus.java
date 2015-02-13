@@ -129,7 +129,7 @@ public class testinoPlus {
 	            clientSocket = serverSocket.accept(); //binding server socket to client socket incoming call and accepting call
 	            System.out.println("Accepted connection : " + clientSocket);
 	            i=i+1;
-	            Thread t = new Thread(new newClientHandler(clientSocket,MyNodesPrs[0]),"thread"+i); //Create a new thread to handle the single call coming from one client
+	            Thread t = new Thread(new newClientHandler(clientSocket),"thread"+i); //Create a new thread to handle the single call coming from one client
 	            System.out.println("Thread "+t.getName()+" is starting");
 	            t.start(); //Starting the run method contained in CLIENTHandler class
 

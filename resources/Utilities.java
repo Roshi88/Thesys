@@ -409,4 +409,40 @@ public class Utilities {
 		
 	}
 	
+	public static BigInteger[] splitBigInteger(BigInteger m, double size_of_cnk){
+		
+		
+		String str = m.toString();
+		double lng = str.length();
+		double a=(lng)/size_of_cnk;
+		int num_of_cnk=(int)Math.ceil(a);
+		BigInteger[] B = new BigInteger[num_of_cnk];
+		
+		
+		//c'ho l'ultimo da sistemare, perchè il secondo indice quando arrivo all'ultimo chunk non è multiplo di 7
+		
+		
+		for (int i=0;i<num_of_cnk;i++){
+			if(i<(num_of_cnk-1)){
+				String tmp = str.substring((i*(int)size_of_cnk), ((i+1)*(int)size_of_cnk));
+				B[i]=new BigInteger(tmp);
+			}
+			if(i==(num_of_cnk-1)){
+				String tmp = str.substring((i*(int)size_of_cnk), str.length());
+				B[i]=new BigInteger(tmp);
+			}
+			
+		}
+		
+		return B;
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	}// end splitBigInteger
 }

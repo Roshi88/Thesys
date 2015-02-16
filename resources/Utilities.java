@@ -17,6 +17,7 @@ import java.net.InetAddress;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.math.BigInteger;
+import java.math.BigDecimal;
 
 import paillierp.key.PaillierPrivateKey;
 import paillierp.key.PaillierKey;
@@ -438,11 +439,23 @@ public class Utilities {
 	
 	
 	
-	
-	
-	
-	
-	
-	
 	}// end splitBigInteger
+	
+	 public static BigInteger getBigInteger(Object value) {
+		    BigInteger ret = null;
+		    if ( value != null ) {
+		        if ( value instanceof BigInteger ) {
+		            ret = (BigInteger) value;
+		        } else if ( value instanceof String ) {
+		            ret = new BigInteger( (String) value );
+		        } else if ( value instanceof BigDecimal ) {
+		            ret = ((BigDecimal) value).toBigInteger();
+		        } else if ( value instanceof Number ) {
+		            ret = BigInteger.valueOf( ((Number) value).longValue() );
+		        } else {
+		            throw new ClassCastException( "Not possible to coerce [" + value + "] from class " + value.getClass() + " into a BigInteger." );
+		        }
+		    }
+		    return ret;
+		}
 }

@@ -11,7 +11,8 @@ import resources.Utilities;
 
 public class MTMultiClient {		
 	
-		public static void bigintTransmit(int port, String ipv4, BigInteger[] Bmsg, String pathName){
+	
+		public static void bigintTransmit(int port, String ipv4, BigInteger[] Bmsg, BigInteger Preamble){
 			
 			Socket clientSock = null;
 			ServerSocket serverSock = null;

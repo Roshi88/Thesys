@@ -8,11 +8,14 @@ public class test {
 
 	public static void main(String[] args) {
 
-		BigInteger B = BigInteger.valueOf(12345678);
-		BigInteger[] C = Utilities.splitBigInteger(B, 3);
-		System.out.println(C[0]+"\n"+C[1]+"\n"+C[2]);
-		
-//		MTMultiClient.bigintTransmit(8080, "localhost", Bmsg,"Cyph4");
+	BigInteger[] Bmsg= new BigInteger[5];
+	String sPreamble="1-29";
+	BigInteger preamble=Utilities.stringToBigInteger(sPreamble);
+	
+	for (int i=0;i<5;i++){
+		Bmsg[i]=BigInteger.valueOf(1234567);
+	}
+		MTMultiClient.bigintTransmit(8080, "localhost", Bmsg,preamble);
  //     MTClient.fileTransmit(8080, "localhost", "ip_list");
 
 

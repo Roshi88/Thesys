@@ -29,7 +29,7 @@ public class newClientHandler implements Runnable {
 	 FileOutputStream fos = null;
 	 BufferedOutputStream bos = null;
 	 int msgtype=-1;
-	 int num_of_chunks=-1;
+	 int num_of_rx_cnks=-1;
 	 
 	 
 	public newClientHandler(Socket client) {
@@ -37,15 +37,23 @@ public class newClientHandler implements Runnable {
         
     }
 	
+//I CAN RECEIVE 3 TYPES OF MESSAGES: SHARE, THE ENCRYPTED PASSWORD, THE 4 PDMS
 	public void run() {
 		try{
 			
 			 ObjectOutputStream oos = new ObjectOutputStream(clientSocket.getOutputStream());
 			 ObjectInputStream ois = new ObjectInputStream(clientSocket.getInputStream());
-			 msg = (BigInteger[]) ois.readObject();
-			 System.out.println("Received Biginteger is:"+msg);
+			 Object obj = ois.readObject();
+			 plain=Utilities.getBigInteger(obj);
+			 System.out.println("Received Biginteger is:"+plain);
 			 oos.writeObject("Received");
-			 System.out.println(msg[0]+","+msg[1]+","+msg[2]);
+			 String sPlain = Utilities.bigIntegerToString(plain);
+			 String[] splitArr=Pattern.compile("-").split(sPlain);
+			 msgtype=Integer.parseInt(splitArr[0]);
+			 num_of_rx_cnks=Integer.parseInt(splitArr[1]);
+			 if(msgtype==1)
+				 System.out.println("Message Type= 1");
+			 
 //			 Paillier dsys = new Paillier();
 //			 dsys.setDecryptEncrypt(PrivKey);
 //			 plain=dsys.decrypt(msg);

@@ -112,31 +112,34 @@ Paillier esys = new Paillier();
 		
 		
 		
-		for(int i=0;i<num_of_cnks;i++){
-			String name = new String();
-			if(i<9){
-				name="Cyph2"+".00"+(i+1);
-			}
-			if(i>8){
-				name="Cyph2"+".0"+(i+1);
-			}
-			Utilities.newBigIntegerToFile(C[1][i], name);
-		}
-		
-		Utilities.retrieveShare(NodePRs[1], 2);
-		
-		
+//		for(int i=0;i<num_of_cnks;i++){
+//			String name = new String();
+//			if(i<9){
+//				name="Cyph2"+".00"+(i+1);
+//			}
+//			if(i>8){
+//				name="Cyph2"+".0"+(i+1);
+//			}
+//			Utilities.newBigIntegerToFile(C[1][i], name);
+//		}
+//		
+//		Utilities.retrieveShare(NodePRs[1], 2,"myShare");
 		
 		
 		
 		
 		
 		
+		
+		
+		BigInteger[] shareTo2 = C[1];
 		
 		
 ////////////////////////////////////FINE RICOSTRUZIONE////////////////////////////////////		
+	
+		
 		BigInteger Preamble = Utilities.stringToBigInteger("1-"+num_of_cnks);
-		//MTMultiClient.bigintTransmit(8080, "localhost", shareTo2, Preamble);
+		MTMultiClient.bigintTransmit(8080, "localhost", shareTo2, Preamble);
 		
 		
 ////////////////////////////////STARTING THE RECEIVING SIDE//////////////////////////////////////////////

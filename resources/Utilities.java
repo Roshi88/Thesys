@@ -324,7 +324,7 @@ public class Utilities {
 		
 	}
 	
-	public static void retrieveShare(PaillierPrivateKey Pr,int nID){
+	public static void retrieveShare(PaillierPrivateKey Pr,int nID,String exitFileName){
 		
 		String name= new String();
 		String outfname= new String();
@@ -354,7 +354,7 @@ public class Utilities {
 				
 			arf.add(files[i]);
 			
-			File res = new File ("rxPlain"+nID+".rec");
+			File res = new File (exitFileName);
 	
 			
 			

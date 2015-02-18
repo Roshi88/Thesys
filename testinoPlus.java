@@ -103,7 +103,7 @@ public class testinoPlus {
 	
 		
 		
-		Utilities.retrieveShare(MyNodesPrs[2], 3);
+		Utilities.retrieveShare(MyNodesPrs[2], 3,"recoveredShare");
 		
 		
 		

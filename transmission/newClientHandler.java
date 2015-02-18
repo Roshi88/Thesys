@@ -4,11 +4,14 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.security.SecureRandom;
 import java.util.regex.Pattern;
 import java.math.BigInteger;
 
 import paillierp.Paillier;
+import paillierp.key.KeyGen;
 import paillierp.key.PaillierPrivateKey;
+import paillierp.key.PaillierPrivateThresholdKey;
 import resources.Utilities;
 
 public class newClientHandler implements Runnable {
@@ -60,18 +63,7 @@ public class newClientHandler implements Runnable {
 			 num_of_rx_cnks=Integer.parseInt(splitArr[1]);
 			 System.out.println("Message type: "+msgtype+"\n"+"Number of received cnks: "+num_of_rx_cnks);
 			 
-			 Paillier dsys = new Paillier();
-			 dsys.setDecryptEncrypt(PrivKey);
-			 String tmp = null;
-			 BigInteger[] plain = new BigInteger[num_of_rx_cnks];
-			 for (int i=0;i<num_of_rx_cnks;i++){
-			 plain[i]=dsys.decrypt(msg[i]); //sistemare qua, devo cominciare a mandare i veri biginteger criptati
-			 tmp=tmp+plain[i].toString();
-			 }
-			 
-			 BigInteger plainMsg= new BigInteger(tmp);
-			 
-			 System.out.println(plainMsg);
+
 			 //a questo punto ho i miei 29 biginteger. Li devo sistemare uno accanto all'altro e rimettere nel file. 
 			 
 			 
@@ -81,7 +73,54 @@ public class newClientHandler implements Runnable {
 			 case 1: //Share received
 				 
 				 System.out.println("Received the share");
-				 
+				 for(int i=0;i<num_of_rx_cnks;i++){
+						String name = new String();
+						if(i<9){
+							name="Cyph2"+".00"+(i+1);
+						}
+						if(i>8){
+							name="Cyph2"+".0"+(i+1);
+						}
+						Utilities.newBigIntegerToFile(msg[i], name);
+					}
+					
+					Utilities.retrieveShare(PrivKey, 2,"myShare");
+					int l, w;
+					BigInteger v, n, shares, combineSharesConstant;
+					BigInteger[]  viarray=new BigInteger[5];
+					PaillierPrivateThresholdKey[] res = null;
+					try {  
+						FileReader File= new FileReader("myShare");
+						BufferedReader buf=new BufferedReader(File);
+						String line=buf.readLine();
+						l = Integer.parseInt(line.split(":")[1]);
+						
+						line = buf.readLine();
+						w = Integer.parseInt(line.split(":")[1]);
+						
+						line = buf.readLine();
+						v = new BigInteger(line.split(":")[1]);
+						
+						line = buf.readLine();
+						n = new BigInteger(line.split(":")[1]);
+						
+						line = buf.readLine();
+						combineSharesConstant = new BigInteger(line.split(":")[1]);
+						
+						line = buf.readLine();
+						shares = new BigInteger(line.split(":")[1]);
+						
+						for(int i=0; i<5; i++){
+						line = buf.readLine();
+						viarray[i] = BigInteger.ZERO;
+						}
+					
+					SecureRandom rnd = new SecureRandom();
+					PaillierPrivateThresholdKey result = new PaillierPrivateThresholdKey(n, l, combineSharesConstant, w, v, 
+							viarray, shares, 2, rnd.nextLong());//il 2 qua è il nodeID
+					}catch(IOException e){
+						System.out.println(e);
+					}
 				 break;
 				 
 			 case 2: // Session Secret received

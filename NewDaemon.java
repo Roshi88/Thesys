@@ -106,28 +106,35 @@ Paillier esys = new Paillier();
 		}
 		
 		
-		BigInteger[] shareTo2= C[1];
-		BigInteger[] shareTo3= C[2];
-		BigInteger[] shareTo4= C[3];
-		BigInteger[] shareTo5= C[4];
+		//A questo punto ho i testi cifrati ognuno in una cella della matrice C
 		
-		BigInteger[] plain = new BigInteger[num_of_cnks];
-		 Paillier dsys = new Paillier();
-		 dsys.setDecryptEncrypt(NodePRs[1]);
-		 String tmp = new String();
-		for (int i=0;i<num_of_cnks;i++){
-			 plain[i]=dsys.decrypt(shareTo2[i]); //sistemare qua, devo cominciare a mandare i veri biginteger criptati
-			 tmp=tmp+plain[i].toString();
-			 }
-			 
-			 BigInteger plainMsg= new BigInteger(tmp);
-			 
-			 System.out.println(plainMsg);
-			 Utilities.newBigIntegerToFile(plainMsg, "recovered");
-			 
+//////////////////////////////////////RICOSTRUZIONE//////////////////////////////////////
 		
-		System.out.println("Array length: "+shareTo2.length);
 		
+		
+		for(int i=0;i<num_of_cnks;i++){
+			String name = new String();
+			if(i<9){
+				name="Cyph2"+".00"+(i+1);
+			}
+			if(i>8){
+				name="Cyph2"+".0"+(i+1);
+			}
+			Utilities.newBigIntegerToFile(C[1][i], name);
+		}
+		
+		Utilities.retrieveShare(NodePRs[1], 2);
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+////////////////////////////////////FINE RICOSTRUZIONE////////////////////////////////////		
 		BigInteger Preamble = Utilities.stringToBigInteger("1-"+num_of_cnks);
 		//MTMultiClient.bigintTransmit(8080, "localhost", shareTo2, Preamble);
 		

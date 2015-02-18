@@ -2,6 +2,7 @@ import paillierp.Paillier;
 import paillierp.key.*;
 import resources.Generation;
 import resources.Utilities;
+import transmission.MTMultiClient;
 import transmission.newClientHandler;
 
 import java.io.File;
@@ -36,20 +37,27 @@ public class NewDaemon {
 /////////////////////////////////////GENERATING SHARES//////////////////////////////////////////
 		String[] chiavi = new String[n];
 		long[] dims = new long[5];
+		boolean token=false;
 		
 		try{
+			while(true){
 			Generation.shareGen(n, 32);
+			
 			for (int i=0; i<n; i++){
 				chiavi[i] = "chiave" + (i+1);
 				File tmp= new File(chiavi[i]);
 				dims[i]=tmp.length(); 	//I FILE BUONI SONO DA 197 A 203 BYTE
-				System.out.println(dims[i]);
 				if(dims[i]>203 || dims[i]<197){
-					System.out.println("Error:Share dimension not valid");
-					return;
-				}
+					token=false;
+					break;
+				}else token=true;
+				
+				
 			}
-			System.out.println("Share dimension is ok.");
+			if(token==true)
+				break;
+			}
+			System.out.println(dims[0]+"\n"+dims[1]+"\n"+dims[2]+"\n"+dims[3]+"\n"+dims[4]);
 			
 		}catch(IOException e){
 			System.out.println(e);
@@ -103,39 +111,60 @@ Paillier esys = new Paillier();
 		BigInteger[] shareTo4= C[3];
 		BigInteger[] shareTo5= C[4];
 		
+		BigInteger[] plain = new BigInteger[num_of_cnks];
+		 Paillier dsys = new Paillier();
+		 dsys.setDecryptEncrypt(NodePRs[1]);
+		 String tmp = new String();
+		for (int i=0;i<num_of_cnks;i++){
+			 plain[i]=dsys.decrypt(shareTo2[i]); //sistemare qua, devo cominciare a mandare i veri biginteger criptati
+			 tmp=tmp+plain[i].toString();
+			 }
+			 
+			 BigInteger plainMsg= new BigInteger(tmp);
+			 
+			 System.out.println(plainMsg);
+			 Utilities.newBigIntegerToFile(plainMsg, "recovered");
+			 
+		
 		System.out.println("Array length: "+shareTo2.length);
 		
-		 ServerSocket serverSocket=null; // defining a server socket to listen data
-	     Socket clientSocket = null; // defining a client socket to send data
+		BigInteger Preamble = Utilities.stringToBigInteger("1-"+num_of_cnks);
+		//MTMultiClient.bigintTransmit(8080, "localhost", shareTo2, Preamble);
 		
-	    final int port=8080; 
-	 	int i=0;
-		try {
-	        serverSocket = new ServerSocket(port); // Opening a server socket to listen for client calls
-	        System.out.println("Server started.");
-	    } catch (Exception e) {
-	        System.err.println("Port already in use.");
-	        System.exit(1);
-	    }
 		
-		while (true) {
-	        
-			try {
-	        	
-	            clientSocket = serverSocket.accept(); //binding server socket to client socket incoming call and accepting call
-	            System.out.println("Accepted connection : " + clientSocket);
-	            i=i+1;
-	            Thread t = new Thread(new newClientHandler(clientSocket),"thread"+i); //Create a new thread to handle the single call coming from one client
-	            System.out.println("Thread "+t.getName()+" is starting");
-	            t.start(); //Starting the run method contained in CLIENTHandler class
-
-	        } catch (Exception e) {
-	            System.err.println("Error in connection attempt.");
-	        }
-	    
-	       	
+////////////////////////////////STARTING THE RECEIVING SIDE//////////////////////////////////////////////
 		
-		}//end while
+//		 ServerSocket serverSocket=null; // defining a server socket to listen data
+//	     Socket clientSocket = null; // defining a client socket to send data
+//		
+//	    final int port=8080; 
+//	 	int i=0;
+//		try {
+//	        serverSocket = new ServerSocket(port); // Opening a server socket to listen for client calls
+//	        System.out.println("Server started.");
+//	    } catch (Exception e) {
+//	        System.err.println("Port already in use.");
+//	        System.exit(1);
+//	    }
+//		
+//		while (true) {
+//	        
+//			try {
+//	        	
+//	            clientSocket = serverSocket.accept(); //binding server socket to client socket incoming call and accepting call
+//	            System.out.println("Accepted connection : " + clientSocket);
+//	            i=i+1;
+//	            Thread t = new Thread(new newClientHandler(clientSocket, NodePRs[1]),"thread"+i); //Create a new thread to handle the single call coming from one client
+//	            System.out.println("Thread "+t.getName()+" is starting");
+//	            t.start(); //Starting the run method contained in CLIENTHandler class
+//
+//	        } catch (Exception e) {
+//	            System.err.println("Error in connection attempt.");
+//	        }
+//	    
+//	       	
+//		
+//		}//end while
 		
 		
 		

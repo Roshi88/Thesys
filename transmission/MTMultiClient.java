@@ -33,13 +33,14 @@ public class MTMultiClient {
 				
 				ObjectOutputStream oos = new ObjectOutputStream(clientSock.getOutputStream());
 				ObjectInputStream ois = new ObjectInputStream(clientSock.getInputStream());
-				oos.writeObject(Bmsg);
-				System.out.println("Wrote in outputstream:"+Bmsg);
+				oos.writeObject(Preamble);
+				System.out.println("Wrote in outputstream:"+Preamble);
 				msg = (String) ois.readObject();
 				
-				if (msg.equals("Received"))
-					System.out.println("OK");
-				
+				if (msg.equals("Received preamble")){
+					System.out.println("OK, proceding to send Msg");
+					oos.writeObject(Bmsg);
+				}
 			
 				
 				

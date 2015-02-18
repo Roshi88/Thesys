@@ -21,7 +21,7 @@ public class newClientHandler implements Runnable {
 	 private PaillierPrivateKey PrivKey;
 	 ServerSocket servSock;
 	 BigInteger[] msg = null;
-	 BigInteger plain = null;
+	 BigInteger preamble = null;
 	 int bytesRead;
 	 int current = 0;
 	 DataOutputStream dos = null;
@@ -32,8 +32,9 @@ public class newClientHandler implements Runnable {
 	 int num_of_rx_cnks=-1;
 	 
 	 
-	public newClientHandler(Socket client) {
+	public newClientHandler(Socket client, PaillierPrivateKey PR) {
         this.clientSocket = client;
+        this.PrivKey = PR;
         
     }
 	
@@ -43,25 +44,59 @@ public class newClientHandler implements Runnable {
 			
 			 ObjectOutputStream oos = new ObjectOutputStream(clientSocket.getOutputStream());
 			 ObjectInputStream ois = new ObjectInputStream(clientSocket.getInputStream());
-			 Object obj = ois.readObject();
-			 plain=Utilities.getBigInteger(obj);
-			 System.out.println("Received Biginteger is:"+plain);
-			 oos.writeObject("Received");
-			 String sPlain = Utilities.bigIntegerToString(plain);
+			 preamble = (BigInteger) ois.readObject();
+			 
+			 
+			 System.out.println("Received Preamble is:"+preamble);
+			 oos.writeObject("Received preamble");
+			 msg =(BigInteger[]) ois.readObject();
+			 System.out.println("Received Message is:"+msg+"\n"+msg[0]+"\n"+msg[2]);
+			 
+			 
+
+			 String sPlain = Utilities.bigIntegerToString(preamble);
 			 String[] splitArr=Pattern.compile("-").split(sPlain);
 			 msgtype=Integer.parseInt(splitArr[0]);
 			 num_of_rx_cnks=Integer.parseInt(splitArr[1]);
-			 if(msgtype==1)
-				 System.out.println("Message Type= 1");
+			 System.out.println("Message type: "+msgtype+"\n"+"Number of received cnks: "+num_of_rx_cnks);
 			 
-//			 Paillier dsys = new Paillier();
-//			 dsys.setDecryptEncrypt(PrivKey);
-//			 plain=dsys.decrypt(msg);
-//			 String sMsg = Utilities.bigIntegerToString(plain);
-//			 
-//			 String[] splitArr=Pattern.compile("-").split(sMsg);
-//			 System.out.println(splitArr[0]);
-//			 System.out.println(splitArr[1]);
+			 Paillier dsys = new Paillier();
+			 dsys.setDecryptEncrypt(PrivKey);
+			 String tmp = null;
+			 BigInteger[] plain = new BigInteger[num_of_rx_cnks];
+			 for (int i=0;i<num_of_rx_cnks;i++){
+			 plain[i]=dsys.decrypt(msg[i]); //sistemare qua, devo cominciare a mandare i veri biginteger criptati
+			 tmp=tmp+plain[i].toString();
+			 }
+			 
+			 BigInteger plainMsg= new BigInteger(tmp);
+			 
+			 System.out.println(plainMsg);
+			 //a questo punto ho i miei 29 biginteger. Li devo sistemare uno accanto all'altro e rimettere nel file. 
+			 
+			 
+			
+			 switch(msgtype){
+			 
+			 case 1: //Share received
+				 
+				 System.out.println("Received the share");
+				 
+				 break;
+				 
+			 case 2: // Session Secret received
+				 
+				 break;
+				 
+			 case 3: //PDM received
+				 
+				 break;
+			 
+			 
+			 }//end switch
+			 
+
+
 
 		
 		}catch(IOException ioe){

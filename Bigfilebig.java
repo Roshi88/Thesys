@@ -3,34 +3,58 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.math.BigInteger;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.io.IOException;
+
+import paillierp.key.PaillierPrivateKey;
+import resources.Generation;
+import transmission.newClientHandler;
 
 
 public class Bigfilebig {
+	
 
 	public static void main(String[] args) throws IOException {
-		//scrivo su file il mio biginteger
 		
-		BigInteger C=BigInteger.valueOf(123123123);
-		String fname = "puppa";
-		FileWriter File= new FileWriter(fname);
-		PrintWriter out=new PrintWriter(File);
+		int n=5;
+		PaillierPrivateKey[] NodePRs = new PaillierPrivateKey[5];
 		
-		out.println(C);
-		out.close();
+		for (int i=0;i<n;i++){
+			NodePRs[i]=Generation.retrieveMyPrivateKey((i+1), "chiavi statiche");
+		}
+		System.out.println("Loaded passwords");
 		
-		//fin qua ho messo il BigInteger sul file
+		 ServerSocket serverSocket=null; // defining a server socket to listen data
+	     Socket clientSocket = null; // defining a client socket to send data
+		final int port=8080; 
+	 	int i=0;
+		try {
+	        serverSocket = new ServerSocket(port); // Opening a server socket to listen for client calls
+	        System.out.println("Server started.");
+	    } catch (Exception e) {
+	        System.err.println("Port already in use.");
+	        System.exit(1);
+	    }
 		
-		//Adesso devo tirar giu il BigInteger DAL file
+		while (true) {
+	        
+			try {
+	        	
+	            clientSocket = serverSocket.accept(); //binding server socket to client socket incoming call and accepting call
+	            System.out.println("Accepted connection : " + clientSocket);
+	            i=i+1;
+	            Thread t = new Thread(new newClientHandler(clientSocket, NodePRs[1]),"thread"+i); //Create a new thread to handle the single call coming from one client
+	            System.out.println("Thread "+t.getName()+" is starting");
+	            t.start(); //Starting the run method contained in newCLIENTHandler class
+
+	        } catch (Exception e) {
+	            System.err.println("Error in connection attempt.");
+	        }
+	    
+	       	
 		
-		FileReader File1= new FileReader(fname);
-		BufferedReader buf=new BufferedReader(File1);
-		String line=buf.readLine();
-		BigInteger M = new BigInteger(line);
-		
-		System.out.println("C is: "+C);
-		System.out.println("M is: "+M);
-			
+		}//end while
 	}
 
 }

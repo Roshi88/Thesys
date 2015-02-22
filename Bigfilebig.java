@@ -1,4 +1,5 @@
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.PrintWriter;
@@ -6,8 +7,10 @@ import java.math.BigInteger;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.io.IOException;
+import java.security.SecureRandom;
 
 import paillierp.key.PaillierPrivateKey;
+import paillierp.key.PaillierPrivateThresholdKey;
 import resources.Generation;
 import transmission.newClientHandler;
 
@@ -19,6 +22,7 @@ public class Bigfilebig {
 		
 		int n=5;
 		PaillierPrivateKey[] NodePRs = new PaillierPrivateKey[5];
+		PaillierPrivateThresholdKey PPTK = null;
 		
 		for (int i=0;i<n;i++){
 			NodePRs[i]=Generation.retrieveMyPrivateKey((i+1), "chiavi statiche");
@@ -38,21 +42,30 @@ public class Bigfilebig {
 	    }
 		
 		while (true) {
+			
+			 if(PPTK==null)
+	            	System.out.println("Pptk still not received");
+	            else
+	            	System.out.println("Pptk received");
 	        
 			try {
 	        	
 	            clientSocket = serverSocket.accept(); //binding server socket to client socket incoming call and accepting call
 	            System.out.println("Accepted connection : " + clientSocket);
 	            i=i+1;
-	            Thread t = new Thread(new newClientHandler(clientSocket, NodePRs[1]),"thread"+i); //Create a new thread to handle the single call coming from one client
+	            Thread t = new Thread(new newClientHandler(clientSocket, NodePRs[1], PPTK),"thread"+i); //Create a new thread to handle the single call coming from one client
 	            System.out.println("Thread "+t.getName()+" is starting");
 	            t.start(); //Starting the run method contained in newCLIENTHandler class
 
+	           
+				
+				
+	            
 	        } catch (Exception e) {
 	            System.err.println("Error in connection attempt.");
 	        }
 	    
-	       	
+
 		
 		}//end while
 	}

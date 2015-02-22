@@ -22,22 +22,18 @@ public class newClientHandler implements Runnable {
 	
 	 private Socket clientSocket;
 	 private PaillierPrivateKey PrivKey;
+	 PaillierPrivateThresholdKey result;
 	 ServerSocket servSock;
-	 BigInteger[] msg = null;
-	 BigInteger preamble = null;
 	 int bytesRead;
 	 int current = 0;
-	 DataOutputStream dos = null;
-	 BufferedReader dis = null;
-	 FileOutputStream fos = null;
-	 BufferedOutputStream bos = null;
 	 int msgtype=-1;
 	 int num_of_rx_cnks=-1;
 	 
 	 
-	public newClientHandler(Socket client, PaillierPrivateKey PR) {
-        this.clientSocket = client;
+	public newClientHandler(Socket client, PaillierPrivateKey PR, PaillierPrivateThresholdKey PPTK) {
+        this.clientSocket = client; 
         this.PrivKey = PR;
+        this.result = PPTK;
         
     }
 	
@@ -47,12 +43,12 @@ public class newClientHandler implements Runnable {
 			
 			 ObjectOutputStream oos = new ObjectOutputStream(clientSocket.getOutputStream());
 			 ObjectInputStream ois = new ObjectInputStream(clientSocket.getInputStream());
-			 preamble = (BigInteger) ois.readObject();
+			 BigInteger preamble = (BigInteger) ois.readObject();
 			 
 			 
 			 System.out.println("Received Preamble is:"+preamble);
 			 oos.writeObject("Received preamble");
-			 msg =(BigInteger[]) ois.readObject();
+			 BigInteger[] msg =(BigInteger[]) ois.readObject();
 			 System.out.println("Received Message is:"+msg+"\n"+msg[0]+"\n"+msg[2]);
 			 
 			 
@@ -85,10 +81,13 @@ public class newClientHandler implements Runnable {
 					}
 					
 					Utilities.retrieveShare(PrivKey, 2,"myShare");
+					
+////////////////A QUESTO PUNTO HO CREATO IL FILE, E LO VADO AD ELABORARE NEL 3D PRINCIPALE////////////////
+					
 					int l, w;
 					BigInteger v, n, shares, combineSharesConstant;
 					BigInteger[]  viarray=new BigInteger[5];
-					PaillierPrivateThresholdKey[] res = null;
+					
 					try {  
 						FileReader File= new FileReader("myShare");
 						BufferedReader buf=new BufferedReader(File);
@@ -114,10 +113,11 @@ public class newClientHandler implements Runnable {
 						line = buf.readLine();
 						viarray[i] = BigInteger.ZERO;
 						}
-					
+					buf.close();
 					SecureRandom rnd = new SecureRandom();
 					PaillierPrivateThresholdKey result = new PaillierPrivateThresholdKey(n, l, combineSharesConstant, w, v, 
 							viarray, shares, 2, rnd.nextLong());//il 2 qua è il nodeID
+					
 					}catch(IOException e){
 						System.out.println(e);
 					}
@@ -144,8 +144,7 @@ public class newClientHandler implements Runnable {
 			System.out.println(cnfe);
 		}finally {
 	    	try{
-		          if (dis != null) dis.close();
-		          if (dos != null) dos.close();
+		         
 		          if (clientSocket!=null) clientSocket.close();
 		    	}catch (IOException e){
 		    		System.out.println(e);

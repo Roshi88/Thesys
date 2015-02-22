@@ -11,6 +11,7 @@ import java.math.BigInteger;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Arrays;
+import java.util.Random;
 
 public class NewDaemon {
 
@@ -137,9 +138,18 @@ Paillier esys = new Paillier();
 		
 ////////////////////////////////////FINE RICOSTRUZIONE////////////////////////////////////		
 	
-		
+////////////////////////////////TRASMISSIONE SHARE////////////////////////////////////////		
 		BigInteger Preamble = Utilities.stringToBigInteger("1-"+num_of_cnks);
 		MTMultiClient.bigintTransmit(8080, "localhost", shareTo2, Preamble);
+		System.out.println("Share transmitted");
+		
+///////////////////////////////TRASMISSIONE SS///////////////////////////////////////////
+//		Random rnd = new Random();
+//		BigInteger[] SS = new BigInteger[1];
+//		SS[0]=new BigInteger(7,rnd);
+//		BigInteger PreambleSS = Utilities.stringToBigInteger("2-"+BigInteger.ONE);
+//		MTMultiClient.bigintTransmit(8080,"localhost",SS,PreambleSS);
+//		System.out.println("Session Secret Transmitted");
 		
 		
 ////////////////////////////////STARTING THE RECEIVING SIDE//////////////////////////////////////////////

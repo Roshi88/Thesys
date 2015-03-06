@@ -122,30 +122,29 @@ public class testinoPlus {
 	        System.exit(1);
 	    }
 		
-		while (true) {
-	        
-			try {
-	        	
-	            clientSocket = serverSocket.accept(); //binding server socket to client socket incoming call and accepting call
-	            System.out.println("Accepted connection : " + clientSocket);
-	            i=i+1;
-	            Thread t = new Thread(new newClientHandler(clientSocket,MyNodesPrs[2]),"thread"+i); //Create a new thread to handle the single call coming from one client
-	            System.out.println("Thread "+t.getName()+" is starting");
-	            t.start(); //Starting the run method contained in CLIENTHandler class
-
-	        } catch (Exception e) {
-	            System.err.println("Error in connection attempt.");
-	        }
-	    
-	       	
-		
-		}//end while
-		
-		
-		
-		
-		
-		
+//		while (true) {
+//	        
+//			try {
+//	        	
+//	            clientSocket = serverSocket.accept(); //binding server socket to client socket incoming call and accepting call
+//	            System.out.println("Accepted connection : " + clientSocket);
+//	            i=i+1;
+//	            Thread t = new Thread(new newClientHandler(clientSocket,MyNodesPrs[2]),"thread"+i); //Create a new thread to handle the single call coming from one client
+//	            System.out.println("Thread "+t.getName()+" is starting");
+//	            t.start(); //Starting the run method contained in CLIENTHandler class
+//
+//	        } catch (Exception e) {
+//	            System.err.println("Error in connection attempt.");
+//	        }
+//	    
+//	       	
+//		
+//		}//end while
+//		
+//		
+//		
+//		
+//		
+//		
 	}//fine main
-
 }//fine class testino

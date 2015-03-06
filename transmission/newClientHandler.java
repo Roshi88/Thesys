@@ -1,39 +1,36 @@
 package transmission;
 
 import java.io.*;
-import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.security.SecureRandom;
 import java.util.regex.Pattern;
 import java.math.BigInteger;
 
-import paillierp.Paillier;
-import paillierp.key.KeyGen;
 import paillierp.key.PaillierPrivateKey;
 import paillierp.key.PaillierPrivateThresholdKey;
 import resources.Utilities;
+import resources.Structures.*;
 
 public class newClientHandler implements Runnable {
 
 	 
-	 private final static int FILE_SIZE=6022386;
+	 
 	 
 	
 	 private Socket clientSocket;
 	 private PaillierPrivateKey PrivKey;
+	 private PPTKverify pv;
+	 private SSverify sv;
 	 PaillierPrivateThresholdKey result;
-	 ServerSocket servSock;
-	 int bytesRead;
-	 int current = 0;
 	 int msgtype=-1;
 	 int num_of_rx_cnks=-1;
 	 
 	 
-	public newClientHandler(Socket client, PaillierPrivateKey PR, PaillierPrivateThresholdKey PPTK) {
+	public newClientHandler(Socket client, PaillierPrivateKey PR, PPTKverify pv, SSverify sv) {
         this.clientSocket = client; 
         this.PrivKey = PR;
-        this.result = PPTK;
+        this.pv = pv;
+        this.sv= sv;
         
     }
 	
@@ -49,7 +46,7 @@ public class newClientHandler implements Runnable {
 			 System.out.println("Received Preamble is:"+preamble);
 			 oos.writeObject("Received preamble");
 			 BigInteger[] msg =(BigInteger[]) ois.readObject();
-			 System.out.println("Received Message is:"+msg+"\n"+msg[0]+"\n"+msg[2]);
+//			 System.out.println("Received Message is:"+msg+"\n"+msg[0]+"\n"+msg[2]);
 			 
 			 
 
@@ -115,8 +112,13 @@ public class newClientHandler implements Runnable {
 						}
 					buf.close();
 					SecureRandom rnd = new SecureRandom();
-					PaillierPrivateThresholdKey result = new PaillierPrivateThresholdKey(n, l, combineSharesConstant, w, v, 
+					
+					
+
+					result = new PaillierPrivateThresholdKey(n, l, combineSharesConstant, w, v, 
 							viarray, shares, 2, rnd.nextLong());//il 2 qua è il nodeID
+					
+					pv.put(result);
 					
 					}catch(IOException e){
 						System.out.println(e);
@@ -124,6 +126,36 @@ public class newClientHandler implements Runnable {
 				 break;
 				 
 			 case 2: // Session Secret received
+				 
+				 System.out.println("Encrypted Session Secret received");
+				 
+				 //qua ho un array di BigInteger che devo rimettere uno accanto all'altro
+				 
+				 //metto ogni BigInteger in un file, quindi mergio i file e lo rimetto in un BigInt unico
+				 for(int i=0;i<num_of_rx_cnks;i++){
+					 String name=new String();
+					 name="eSStoBI.00"+(i+1);
+					 Utilities.newBigIntegerToFile(msg[i], name);
+				 }
+				 Utilities.listAndMergeFiles("eSStoBI", num_of_rx_cnks);
+				 
+				 // a questo punto ho un file chiamato eSStoBI.rec contenente il mio BigInteger su diverse linee unico
+				
+				 String tmp = new String();
+				 try{
+						FileReader File= new FileReader("eSStoBI.rec");
+						BufferedReader buf=new BufferedReader(File);
+						for(int i=0;i<num_of_rx_cnks;i++){
+						String line=buf.readLine();
+						tmp=tmp+line;
+						}
+						buf.close();
+					}catch(IOException e){
+						System.out.println(e);
+					}
+				 
+				 BigInteger SS=new BigInteger(tmp);
+				 sv.put(SS);
 				 
 				 break;
 				 

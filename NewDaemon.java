@@ -1,4 +1,6 @@
+import paillierp.AbstractPaillier;
 import paillierp.Paillier;
+import paillierp.PartialDecryption;
 import paillierp.key.*;
 import resources.Generation;
 import resources.Utilities;
@@ -39,10 +41,11 @@ public class NewDaemon {
 		String[] chiavi = new String[n];
 		long[] dims = new long[5];
 		boolean token=false;
+		PaillierPrivateThresholdKey[] TKeys=new PaillierPrivateThresholdKey[5];
 		
 		try{
 			while(true){
-			Generation.shareGen(n, 32);
+			TKeys=Generation.shareGen(n, 32);
 			
 			for (int i=0; i<n; i++){
 				chiavi[i] = "chiave" + (i+1);
@@ -144,12 +147,60 @@ Paillier esys = new Paillier();
 		System.out.println("Share transmitted");
 		
 ///////////////////////////////TRASMISSIONE SS///////////////////////////////////////////
-//		Random rnd = new Random();
-//		BigInteger[] SS = new BigInteger[1];
-//		SS[0]=new BigInteger(7,rnd);
-//		BigInteger PreambleSS = Utilities.stringToBigInteger("2-"+BigInteger.ONE);
-//		MTMultiClient.bigintTransmit(8080,"localhost",SS,PreambleSS);
-//		System.out.println("Session Secret Transmitted");
+		
+		//Per criptare la chiave uso quella roba con abstractPaillier in groupauthority
+		Random rnd = new Random();
+		BigInteger[] SS = new BigInteger[1];
+		SS[0]=new BigInteger(32,rnd);
+		
+		//devo splittare la chiave encryptedSessionSecret in blocchi di 7 byte e metterla in un array di BigInteger
+		BigInteger r = BigInteger.valueOf(1283712638);
+		BigInteger encryptedSessionSecret = AbstractPaillier.encrypt(SS[0],r, TKeys[1].getThresholdKey());
+		System.out.println("Encrypted Session Secret is: "+encryptedSessionSecret);
+		Utilities.newBigIntegerToFile(encryptedSessionSecret, "eSS");
+		int eSSdim=0;
+		try{
+		File eSSfile=new File("eSS");
+		Utilities.splitFile(eSSfile,size_of_cnk);
+		eSSdim= (int)(eSSfile.length()/size_of_cnk)+1;
+		System.out.println("eSS dimension is: "+eSSdim);
+		}catch(IOException e){
+			System.out.println(e);
+		}
+		BigInteger[] eSStoTx = new BigInteger[eSSdim]; 
+		
+		for (int i=0;i<eSSdim;i++){
+			
+			eSStoTx[i]=Utilities.newFileToBigInteger("eSS.00"+(i+1));
+			System.out.println(eSStoTx[i]);
+			
+		}
+		
+		
+		
+		System.out.println("Generated SS is: "+SS[0]);
+		BigInteger PreambleSS = Utilities.stringToBigInteger("2-"+eSSdim);
+		MTMultiClient.bigintTransmit(8080,"localhost",eSStoTx,PreambleSS);
+		System.out.println("Session Secret: "+encryptedSessionSecret+" Transmitted");
+		
+		
+//////////////////////////////////GENERAZIONE PDMs////////////////////////////////////////
+		
+		
+		
+		//Le chiavi di soglia le ho nell'array TKeys[]
+		
+		
+		PartialDecryption [] PDMN = new PartialDecryption[n];
+		
+		for(int i=0; i<n; i++){	
+			
+			PDMN [i] = new PartialDecryption(TKeys[i], SS[0]);
+		
+		}
+		
+		//adesso devo spedire a "me stesso" imitando di essere un'altro host i 4 pdm che mi mancano
+		//oltre al mio per calcolare la SS
 		
 		
 ////////////////////////////////STARTING THE RECEIVING SIDE//////////////////////////////////////////////

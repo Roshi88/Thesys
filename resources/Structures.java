@@ -1,7 +1,12 @@
 package resources;
+
 import java.math.BigInteger;
+
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+
+import paillierp.key.PaillierPrivateThresholdKey;
+import paillierp.PartialDecryption;
 
 public class Structures {
 	
@@ -67,4 +72,104 @@ public class Structures {
 	
 	/////////////////////////////END NODEINFO STRUCTURE
 	
+	public static class PPTKverify {
+		
+		private boolean token=false;
+		private PaillierPrivateThresholdKey PPTK;
+		
+		public synchronized void put(PaillierPrivateThresholdKey PrTK){
+		//to put the ready PPTK in the PPTKverify class
+			
+			PPTK=PrTK;
+			token=true; //PPTK is usable
+			notify();
+		}
+		
+		public synchronized PaillierPrivateThresholdKey get(){
+			
+			while(!token)
+				try{
+					wait();
+				}catch(InterruptedException exc){
+					exc.printStackTrace();
+				}
+			
+			return PPTK;
+		}
+	}//end PPTKverify
+	
+public static class SSverify {
+		
+		private boolean token=false;
+		private BigInteger SS;
+		
+		public synchronized void put(BigInteger SS){
+		//to put the ready PPTK in the PPTKverify class
+			
+			this.SS=SS;
+			token=true; //PPTK is usable
+			notify();
+		}
+		
+		public synchronized BigInteger get(){
+			
+			if(!token)
+				try{
+					wait();
+				}catch(InterruptedException exc){
+					exc.printStackTrace();
+				}
+			
+			return SS;
+		}
+	}//end SSverify
+	
+public static class PDMcombine{
+	
+	private int count=0;
+	private boolean cToken=false;
+	private PartialDecryption[] PDMArray=new PartialDecryption[4];
+	
+	
+	
+//	for(int i=0;i<4;i++){
+//		PDMArray[i]=null;
+//	}
+	
+	public synchronized void put(PartialDecryption PDM){
+		if (count==0)
+			this.PDMArray[0]=PDM;
+		else
+			if(count==1)
+				this.PDMArray[1]=PDM;
+			else
+				if(count==2)
+					this.PDMArray[2]=PDM;
+				else
+					if(count==3)
+						this.PDMArray[3]=PDM;
+						cToken=true;
+						notify();
+		count++;
+	}
+	
+	
+	public synchronized PartialDecryption[] get(){
+		
+		if(!cToken)
+			try{
+				wait();
+			}catch(InterruptedException exc){
+				exc.printStackTrace();
+			}
+		
+		return PDMArray;
+	}
+	
+	
+}//end PDMcombine
+
+
+
+
 }

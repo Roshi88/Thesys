@@ -63,7 +63,7 @@ public class Generation {
 	}
 	
 	
-	public static void shareGen(int n, int s)throws IOException{
+	public static PaillierPrivateThresholdKey[] shareGen(int n, int s)throws IOException{
 		
 		
 		//s è la lunghezza delle chiavi
@@ -113,7 +113,7 @@ public class Generation {
 		
 		out.close();
 		}
-		
+		return keys;
 	}
 	
 public static PaillierPrivateKey retrieveMyPrivateKey(int nID, String keysFileName){

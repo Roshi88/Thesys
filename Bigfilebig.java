@@ -9,6 +9,7 @@ import java.net.Socket;
 import java.io.IOException;
 import java.security.SecureRandom;
 
+import paillierp.PartialDecryption;
 import paillierp.key.PaillierPrivateKey;
 import paillierp.key.PaillierPrivateThresholdKey;
 import resources.Generation;
@@ -27,8 +28,11 @@ public class Bigfilebig {
 		PaillierPrivateKey[] NodePRs = new PaillierPrivateKey[5];
 		PPTKverify pv=new PPTKverify();
 		SSverify sv=new SSverify();
+		PDMcombine pdmc=new PDMcombine();
 		PaillierPrivateThresholdKey PPTK;
 		BigInteger SS;
+		PartialDecryption[] PD;
+		
 		
 			
 		for (int i=0;i<n;i++){
@@ -36,11 +40,7 @@ public class Bigfilebig {
 		}
 		System.out.println("Loaded passwords");	
 		
-		String tmp= "123123123";
-		BigInteger BI=new BigInteger(tmp);
-		System.out.println("BI is: "+BI);
-		
-		Thread t = new Thread(new ServerHandler(NodePRs[1],pv,sv),"Receiving Server");
+		Thread t = new Thread(new ServerHandler(NodePRs[1],pv,sv,pdmc),"Receiving Server");
 		t.start();
 		
 		PPTK=pv.get();
@@ -48,6 +48,11 @@ public class Bigfilebig {
 		
 		SS=sv.get();
 		System.out.println("My Encrypted SS after wait is:"+SS);
+		
+		PD=pdmc.get();
+		
+		
+		
 		
 		
 	}

@@ -131,11 +131,6 @@ public static class PDMcombine{
 	private PartialDecryption[] PDMArray=new PartialDecryption[4];
 	
 	
-	
-//	for(int i=0;i<4;i++){
-//		PDMArray[i]=null;
-//	}
-	
 	public synchronized void put(PartialDecryption PDM){
 		if (count==0)
 			this.PDMArray[0]=PDM;
@@ -165,6 +160,8 @@ public static class PDMcombine{
 		
 		return PDMArray;
 	}
+	
+	
 	
 	
 }//end PDMcombine

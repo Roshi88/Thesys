@@ -1,18 +1,15 @@
 import paillierp.AbstractPaillier;
 import paillierp.Paillier;
+import paillierp.PaillierThreshold;
 import paillierp.PartialDecryption;
 import paillierp.key.*;
 import resources.Generation;
 import resources.Utilities;
 import transmission.MTMultiClient;
-import transmission.newClientHandler;
 
 import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.util.Arrays;
 import java.util.Random;
 
 public class NewDaemon {
@@ -21,8 +18,6 @@ public class NewDaemon {
 		
 		
 		int n=5;
-		BigInteger[] shares = new BigInteger[n];
-		int[] sharesLng = new int[n];
 		int[] nLng = new int[n];
 		int size_of_cnk=7;
 		int num_of_cnks=29;
@@ -195,12 +190,71 @@ Paillier esys = new Paillier();
 		
 		for(int i=0; i<n; i++){	
 			
-			PDMN [i] = new PartialDecryption(TKeys[i], SS[0]);
+			PDMN [i] = new PartialDecryption(TKeys[i], encryptedSessionSecret);
 		
 		}
 		
-		//adesso devo spedire a "me stesso" imitando di essere un'altro host i 4 pdm che mi mancano
+		//test per vedere se funziona il combine
+		
+		PaillierThreshold Message = new PaillierThreshold(TKeys[0].getThresholdKey()); //basta una thresholdkey qualunque, quindi uso quella del nodo in cui lavoro
+		Message.setDecryptEncrypt(TKeys[0]);
+		
+		System.out.println("Combined SS is: "+Message.combineShares(PDMN[0],PDMN[1],PDMN[2],PDMN[3],PDMN[4]));
+		
+		//adesso devo spedire a bigfilebig imitando di essere un'altro host i 4 pdm che mi mancano
 		//oltre al mio per calcolare la SS
+		
+		//metto il PDMN in un file (su groupauth c'è scritto come fare)
+		
+		
+		
+		
+		Utilities.pdmToFile("PDM1", PDMN[0]);
+		
+		//lo splitto in blocchi di 7
+		File tmpPdm=new File("PDM1");
+		try{
+		Utilities.splitFile(tmpPdm, size_of_cnk);
+		}catch(IOException e){
+			System.out.println(e);
+		}
+		//li trasformo in biginteger e li infilo in un array di BigInteger
+		int num_of_pdm_cnk=(int) (tmpPdm.length()/size_of_cnk)+1;
+		BigInteger[] PDM1BI=new BigInteger[num_of_pdm_cnk];
+		for (int i=0;i<num_of_pdm_cnk;i++){
+			String inFileName="PDM1.00"+(i+1);		
+			PDM1BI[i]=Utilities.fileToBigInteger(inFileName);
+		}
+		
+		//devo criptare il PDM con la chiave pubblica del destinatario
+		
+		//cripto i BigInteger (plain) in BigInteger (cyph) e li infilo in un array di biginteger
+		
+		BigInteger[] ePDM1BI=new BigInteger[num_of_pdm_cnk];
+		esys.setEncryption(NodePRs[1].getPublicKey());
+		for (int i=0;i<num_of_pdm_cnk;i++){
+		ePDM1BI[i]=esys.encrypt(PDM1BI[i]);
+		}
+		
+		//li sendo
+		BigInteger PreamblePDM1 = Utilities.stringToBigInteger("3-"+num_of_pdm_cnk);
+		MTMultiClient.bigintTransmit(8080,"localhost",ePDM1BI,PreamblePDM1);
+		
+		//parte da provare per la ricezione
+		Paillier dsys=new Paillier();
+		dsys.setDecryptEncrypt(NodePRs[1]);
+		BigInteger[] bau = new BigInteger[num_of_pdm_cnk];
+		for(int i=0;i<num_of_pdm_cnk;i++){
+			 String name=new String();
+			 name="rxPDM.00"+(i+1);
+			 bau[i]=dsys.decrypt(ePDM1BI[i]);
+			 Utilities.bigIntegerToFile(PDM1BI[i], name);
+		 }
+		 
+		 //mergio i file
+		 Utilities.listAndMergeFiles("rxPDM", num_of_pdm_cnk);
+		
+		//fine parte da provare per la ricezione
 		
 		
 ////////////////////////////////STARTING THE RECEIVING SIDE//////////////////////////////////////////////

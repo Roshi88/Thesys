@@ -6,6 +6,8 @@ import java.security.SecureRandom;
 import java.util.regex.Pattern;
 import java.math.BigInteger;
 
+import paillierp.Paillier;
+import paillierp.PartialDecryption;
 import paillierp.key.PaillierPrivateKey;
 import paillierp.key.PaillierPrivateThresholdKey;
 import resources.Utilities;
@@ -21,16 +23,19 @@ public class newClientHandler implements Runnable {
 	 private PaillierPrivateKey PrivKey;
 	 private PPTKverify pv;
 	 private SSverify sv;
+	 private PDMcombine pdmc;
 	 PaillierPrivateThresholdKey result;
 	 int msgtype=-1;
 	 int num_of_rx_cnks=-1;
+	 int PDMCounter=0;
 	 
 	 
-	public newClientHandler(Socket client, PaillierPrivateKey PR, PPTKverify pv, SSverify sv) {
+	public newClientHandler(Socket client, PaillierPrivateKey PR, PPTKverify pv, SSverify sv, PDMcombine pdmc) {
         this.clientSocket = client; 
         this.PrivKey = PR;
         this.pv = pv;
         this.sv= sv;
+        this.pdmc=pdmc;
         
     }
 	
@@ -160,6 +165,40 @@ public class newClientHandler implements Runnable {
 				 break;
 				 
 			 case 3: //PDM received
+				 
+				 //PROBLEMA, SE MI ARRIVA UN PDM MENTRE STO ESEGUENDO QUESTA ROUTINE
+				 
+				 PDMCounter++; //appena ricevo un pdm segno qual'è
+				 //ricevo un array di BigInteger e lo devo trasformare in un oggetto PartialDecryption
+				 //metto ogni BigInteger in un file
+				 Paillier dsys=new Paillier();
+				 dsys.setDecryptEncrypt(PrivKey);
+				 BigInteger[] RcvdPDM= new BigInteger[num_of_rx_cnks];
+				 for(int i=0;i<num_of_rx_cnks;i++){
+					 String name=new String();
+					 name="rxPDM"+PDMCounter+".00"+(i+1);
+					 RcvdPDM[i]=dsys.decrypt(msg[i]);
+					 Utilities.bigIntegerToFile(RcvdPDM[i], name);
+				 }
+				 
+				 //mergio i file
+				 Utilities.listAndMergeFiles("rxPDM"+PDMCounter, num_of_rx_cnks);
+				 //qua ho un unico file di nome rxPDM.rec contenente il mio PDM
+				 
+				 
+				 //tiro giu la partial decryption dal file mergiato
+				 	
+					FileReader File2= new FileReader("rxPDM"+PDMCounter+".rec");
+					BufferedReader buf=new BufferedReader(File2);
+					String line=buf.readLine();
+					BigInteger Dv = new BigInteger(line.split(":")[1]);
+					line = buf.readLine();
+					int Id = Integer.parseInt(line.split(":")[1]);
+					buf.close();
+					//creo l'oggetto PartialDecrypt con i parametri appena ricavati
+					
+					PartialDecryption Abba = new PartialDecryption(Dv,Id);
+					pdmc.put(Abba);
 				 
 				 break;
 			 

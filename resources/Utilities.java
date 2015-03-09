@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import paillierp.key.PaillierPrivateKey;
 import paillierp.key.PaillierKey;
 import paillierp.Paillier;
+import paillierp.PartialDecryption;
 
 public class Utilities {
 	
@@ -239,6 +240,22 @@ public class Utilities {
 		
 	}
 	
+	//Partial Decryption Message to file
+	
+	public static void pdmToFile(String outFileName, PartialDecryption PDM){
+
+		try{
+		FileWriter File = new FileWriter(outFileName);
+		PrintWriter out = new PrintWriter(File);
+		
+		out.println("DV:" + PDM.getDecryptedValue());
+		out.println("Id:" + PDM.getID());
+		out.close();
+		}catch(IOException e){
+			System.out.println(e);
+		}
+		
+	}
 	
 	
 	

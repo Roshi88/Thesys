@@ -146,7 +146,8 @@ Paillier esys = new Paillier();
 		//Per criptare la chiave uso quella roba con abstractPaillier in groupauthority
 		Random rnd = new Random();
 		BigInteger[] SS = new BigInteger[1];
-		SS[0]=new BigInteger(32,rnd);
+//		SS[0]=new BigInteger(32,rnd);
+		SS[0]=BigInteger.valueOf(123123123);
 		
 		//devo splittare la chiave encryptedSessionSecret in blocchi di 7 byte e metterla in un array di BigInteger
 		BigInteger r = BigInteger.valueOf(1283712638);
@@ -207,52 +208,52 @@ Paillier esys = new Paillier();
 		//metto il PDMN in un file (su groupauth c'è scritto come fare)
 		
 		
+		for(int j=1;j<5;j++){
+			
+			String pdmname="PDM"+(j+1);
 		
+			Utilities.pdmToFile(pdmname, PDMN[j]);
 		
-		Utilities.pdmToFile("PDM1", PDMN[0]);
+			//lo splitto in blocchi di 7
+			File tmpPdm=new File(pdmname);
+			try{
+				Utilities.splitFile(tmpPdm, size_of_cnk);
+			}catch(IOException e){
+				System.out.println(e);
+			}
+			//li trasformo in biginteger e li infilo in un array di BigInteger
+			int num_of_pdm_cnk=(int) (tmpPdm.length()/size_of_cnk)+1;
+			BigInteger[] PDMBI=new BigInteger[num_of_pdm_cnk];
+			for (int i=0;i<num_of_pdm_cnk;i++){
+				String inFileName="PDM"+(j+1)+".00"+(i+1);		
+				PDMBI[i]=Utilities.fileToBigInteger(inFileName);
+			}	
+			//cripto i BigInteger (plain) in BigInteger (cyph) e li infilo in un array di biginteger
 		
-		//lo splitto in blocchi di 7
-		File tmpPdm=new File("PDM1");
-		try{
-		Utilities.splitFile(tmpPdm, size_of_cnk);
-		}catch(IOException e){
-			System.out.println(e);
-		}
-		//li trasformo in biginteger e li infilo in un array di BigInteger
-		int num_of_pdm_cnk=(int) (tmpPdm.length()/size_of_cnk)+1;
-		BigInteger[] PDM1BI=new BigInteger[num_of_pdm_cnk];
-		for (int i=0;i<num_of_pdm_cnk;i++){
-			String inFileName="PDM1.00"+(i+1);		
-			PDM1BI[i]=Utilities.fileToBigInteger(inFileName);
-		}
-		
-		//devo criptare il PDM con la chiave pubblica del destinatario
-		
-		//cripto i BigInteger (plain) in BigInteger (cyph) e li infilo in un array di biginteger
-		
-		BigInteger[] ePDM1BI=new BigInteger[num_of_pdm_cnk];
-		esys.setEncryption(NodePRs[1].getPublicKey());
-		for (int i=0;i<num_of_pdm_cnk;i++){
-		ePDM1BI[i]=esys.encrypt(PDM1BI[i]);
-		}
+			BigInteger[] ePDMBI=new BigInteger[num_of_pdm_cnk];
+			esys.setEncryption(NodePRs[1].getPublicKey());
+			for (int i=0;i<num_of_pdm_cnk;i++){
+				ePDMBI[i]=esys.encrypt(PDMBI[i]);
+			}
 		
 		//li sendo
 		BigInteger PreamblePDM1 = Utilities.stringToBigInteger("3-"+num_of_pdm_cnk);
-		MTMultiClient.bigintTransmit(8080,"localhost",ePDM1BI,PreamblePDM1);
+		MTMultiClient.bigintTransmit(8080,"localhost",ePDMBI,PreamblePDM1);
+		}
 		
 		//parte da provare per la ricezione
-		Paillier dsys=new Paillier();
-		dsys.setDecryptEncrypt(NodePRs[1]);
-		BigInteger[] bau = new BigInteger[num_of_pdm_cnk];
-		for(int i=0;i<num_of_pdm_cnk;i++){
-			 String name=new String();
-			 name="rxPDM.00"+(i+1);
-			 bau[i]=dsys.decrypt(ePDM1BI[i]);
-			 Utilities.bigIntegerToFile(PDM1BI[i], name);
-		 }
-		 
-		 //mergio i file
-		 Utilities.listAndMergeFiles("rxPDM", num_of_pdm_cnk);
+//		Paillier dsys=new Paillier();
+//		dsys.setDecryptEncrypt(NodePRs[1]);
+//		BigInteger[] bau = new BigInteger[num_of_pdm_cnk];
+//		for(int i=0;i<num_of_pdm_cnk;i++){
+//			 String name=new String();
+//			 name="rxPDM.00"+(i+1);
+//			 bau[i]=dsys.decrypt(ePDM1BI[i]);
+//			 Utilities.bigIntegerToFile(PDM1BI[i], name);
+//		 }
+//		 
+//		 //mergio i file
+//		 Utilities.listAndMergeFiles("rxPDM", num_of_pdm_cnk);
 		
 		//fine parte da provare per la ricezione
 		

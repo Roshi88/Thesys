@@ -9,6 +9,7 @@ import java.net.Socket;
 import java.io.IOException;
 import java.security.SecureRandom;
 
+import paillierp.PaillierThreshold;
 import paillierp.PartialDecryption;
 import paillierp.key.PaillierPrivateKey;
 import paillierp.key.PaillierPrivateThresholdKey;
@@ -52,6 +53,10 @@ public class Bigfilebig {
 		PD=pdmc.get();
 		
 		
+		PaillierThreshold Message = new PaillierThreshold(PPTK.getThresholdKey());
+		Message.setDecryptEncrypt(PPTK);
+		
+		System.out.println("MY RECOVERED SS IS:"+Message.combineShares(PD[0],PD[1],PD[2],PD[3]));
 		
 		
 		

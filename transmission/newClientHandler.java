@@ -39,6 +39,8 @@ public class newClientHandler implements Runnable {
         
     }
 	
+	
+	
 //I CAN RECEIVE 3 TYPES OF MESSAGES: SHARE, THE ENCRYPTED PASSWORD, THE 4 PDMS
 	public void run() {
 		try{
@@ -64,7 +66,8 @@ public class newClientHandler implements Runnable {
 
 			 //a questo punto ho i miei 29 biginteger. Li devo sistemare uno accanto all'altro e rimettere nel file. 
 			 
-			 
+			 Paillier dsys=new Paillier();
+			 dsys.setDecryptEncrypt(PrivKey);
 			
 			 switch(msgtype){
 			 
@@ -169,36 +172,37 @@ public class newClientHandler implements Runnable {
 				 //PROBLEMA, SE MI ARRIVA UN PDM MENTRE STO ESEGUENDO QUESTA ROUTINE
 				 
 				 PDMCounter++; //appena ricevo un pdm segno qual'è
-				 //ricevo un array di BigInteger e lo devo trasformare in un oggetto PartialDecryption
-				 //metto ogni BigInteger in un file
-				 Paillier dsys=new Paillier();
-				 dsys.setDecryptEncrypt(PrivKey);
-				 BigInteger[] RcvdPDM= new BigInteger[num_of_rx_cnks];
-				 for(int i=0;i<num_of_rx_cnks;i++){
-					 String name=new String();
-					 name="rxPDM"+PDMCounter+".00"+(i+1);
-					 RcvdPDM[i]=dsys.decrypt(msg[i]);
-					 Utilities.bigIntegerToFile(RcvdPDM[i], name);
-				 }
+//				 //ricevo un array di BigInteger e lo devo trasformare in un oggetto PartialDecryption
+//				 //metto ogni BigInteger in un file
+//				 
+//				 BigInteger[] RcvdPDM= new BigInteger[num_of_rx_cnks];
+//				 for(int i=0;i<num_of_rx_cnks;i++){
+//					 String name=new String();
+//					 name="rxPDM"+PDMCounter+".00"+(i+1);
+//					 RcvdPDM[i]=dsys.decrypt(msg[i]);
+//					 Utilities.bigIntegerToFile(RcvdPDM[i], name);
+//				 }
+//				 
+//				 //mergio i file
+//				 Utilities.listAndMergeFiles("rxPDM"+PDMCounter, num_of_rx_cnks);
+//				 //qua ho un unico file di nome rxPDM.rec contenente il mio PDM
+//				 
+//				 
+//				 //tiro giu la partial decryption dal file mergiato
+//				 	
+//					FileReader File2= new FileReader("rxPDM"+PDMCounter+".rec");
+//					BufferedReader buf=new BufferedReader(File2);
+//					String line=buf.readLine();
+//					BigInteger Dv = new BigInteger(line.split(":")[1]);
+//					line = buf.readLine();
+//					int Id = Integer.parseInt(line.split(":")[1]);
+//					buf.close();
+//					//creo l'oggetto PartialDecrypt con i parametri appena ricavati
+//					
 				 
-				 //mergio i file
-				 Utilities.listAndMergeFiles("rxPDM"+PDMCounter, num_of_rx_cnks);
-				 //qua ho un unico file di nome rxPDM.rec contenente il mio PDM
-				 
-				 
-				 //tiro giu la partial decryption dal file mergiato
-				 	
-					FileReader File2= new FileReader("rxPDM"+PDMCounter+".rec");
-					BufferedReader buf=new BufferedReader(File2);
-					String line=buf.readLine();
-					BigInteger Dv = new BigInteger(line.split(":")[1]);
-					line = buf.readLine();
-					int Id = Integer.parseInt(line.split(":")[1]);
-					buf.close();
-					//creo l'oggetto PartialDecrypt con i parametri appena ricavati
+				 	PartialDecryption PDM=Utilities.retrievePDM(num_of_rx_cnks, msg, PDMCounter, PrivKey);
 					
-					PartialDecryption Abba = new PartialDecryption(Dv,Id);
-					pdmc.put(Abba);
+					pdmc.put(PDM);
 				 
 				 break;
 			 

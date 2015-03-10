@@ -387,6 +387,50 @@ public class Utilities {
 		
 	}//end of retrieveShare
 	
+	public static synchronized PartialDecryption retrievePDM(int num_of_rx_cnks, BigInteger[] Array_of_pdm_cnks, int PDMCounter, PaillierPrivateKey PrivKey){
+		
+		BigInteger[] RcvdPDM= new BigInteger[num_of_rx_cnks];
+		Paillier dsys=new Paillier();
+		dsys.setDecryptEncrypt(PrivKey);
+		PartialDecryption PDM=null;
+		 for(int i=0;i<num_of_rx_cnks;i++){
+			 String name=new String();
+			 name="rxPDM"+PDMCounter+".00"+(i+1);
+			 RcvdPDM[i]=dsys.decrypt(Array_of_pdm_cnks[i]);
+			 Utilities.bigIntegerToFile(RcvdPDM[i], name);
+		 }
+		 
+		 //mergio i file
+		 Utilities.listAndMergeFiles("rxPDM"+PDMCounter, num_of_rx_cnks);
+		 //qua ho un unico file di nome rxPDM.rec contenente il mio PDM
+		 
+		 
+		 //tiro giu la partial decryption dal file mergiato
+		 	try{
+			FileReader File2= new FileReader("rxPDM"+PDMCounter+".rec");
+			BufferedReader buf=new BufferedReader(File2);
+			String line=buf.readLine();
+			BigInteger Dv = new BigInteger(line.split(":")[1]);
+			line = buf.readLine();
+			int Id = Integer.parseInt(line.split(":")[1]);
+			buf.close();
+		 	
+			//creo l'oggetto PartialDecrypt con i parametri appena ricavati
+			
+			PDM = new PartialDecryption(Dv,Id);
+		 	}catch(IOException e){
+		 		System.out.println(e);
+		 	}
+		 	return PDM;
+	}
+	
+	
+	
+	
+	
+	
+	
+	
 	public static void listAndMergeFiles(String inFileName,int num_of_chks){
 		
 		ArrayList<File> arf = new ArrayList<File>();

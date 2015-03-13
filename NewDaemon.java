@@ -10,6 +10,7 @@ import transmission.MTMultiClient;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.net.InetAddress;
 import java.util.Random;
 
 public class NewDaemon {
@@ -130,7 +131,6 @@ Paillier esys = new Paillier();
 		
 		
 		
-		
 		BigInteger[] shareTo2 = C[1];
 		
 		
@@ -207,8 +207,8 @@ Paillier esys = new Paillier();
 		
 		//metto il PDMN in un file (su groupauth c'è scritto come fare)
 		
-		
-		for(int j=1;j<5;j++){
+		BigInteger[] PreamblePDM=new BigInteger[5];
+		for(int j=0;j<5;j++){
 			
 			String pdmname="PDM"+(j+1);
 		
@@ -237,8 +237,8 @@ Paillier esys = new Paillier();
 			}
 		
 		//li sendo
-		BigInteger PreamblePDM1 = Utilities.stringToBigInteger("3-"+num_of_pdm_cnk);
-		MTMultiClient.bigintTransmit(8080,"localhost",ePDMBI,PreamblePDM1);
+		PreamblePDM[j] = Utilities.stringToBigInteger((j+3)+"-"+num_of_pdm_cnk);
+		MTMultiClient.bigintTransmit(8080,"localhost",ePDMBI,PreamblePDM[j]);
 		}
 		
 		//parte da provare per la ricezione

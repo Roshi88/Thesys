@@ -126,32 +126,47 @@ public static class SSverify {
 	
 public static class PDMcombine{
 	
-	private int count=0;
+	
 	private boolean cToken=false;
-	private PartialDecryption[] PDMArray=new PartialDecryption[4];
+	private boolean[] tokenArray=new boolean[5];
+	private PartialDecryption[] PDMArray=new PartialDecryption[5];
+	private int PDMC=0;
 	
 	
-	public synchronized void put(PartialDecryption PDM){
-		if (count==0)
-			this.PDMArray[0]=PDM;
-		else
-			if(count==1)
-				this.PDMArray[1]=PDM;
-			else
-				if(count==2)
-					this.PDMArray[2]=PDM;
-				else
-					if(count==3)
-						this.PDMArray[3]=PDM;
-						cToken=true;
-						notify();
-		count++;
+	public synchronized int getPDMCounter(){
+		PDMC++;
+		return PDMC-1;
+	}
+	
+//	public synchronized void put(PartialDecryption PDM,int count){
+//		if (count==0)
+//			this.PDMArray[0]=PDM;
+//		else
+//			if(count==1)
+//				this.PDMArray[1]=PDM;
+//			else
+//				if(count==2)
+//					this.PDMArray[2]=PDM;
+//				else
+//					if(count==3)
+//						this.PDMArray[3]=PDM;
+//						cToken=true;
+//						notify();
+//	}
+	
+	public synchronized void putWithPosition(PartialDecryption PDM, int positionInPdmArray){
+		
+		this.PDMArray[positionInPdmArray]=PDM;
+		this.tokenArray[positionInPdmArray]=true;
+		
+		if(tokenArray[0]||tokenArray[1]||tokenArray[2]||tokenArray[3]||tokenArray[4])
+			notify();
 	}
 	
 	
 	public synchronized PartialDecryption[] get(){
 		
-		if(!cToken)
+		if(!tokenArray[0]||!tokenArray[1]||!tokenArray[2]||!tokenArray[3]||!tokenArray[4])
 			try{
 				wait();
 			}catch(InterruptedException exc){
